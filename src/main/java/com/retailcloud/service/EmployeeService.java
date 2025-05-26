@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.retailcloud.dto.CreateEmployeeRequest;
+import com.retailcloud.dto.UpdateEmployeeRequest;
 import com.retailcloud.model.Department;
 import com.retailcloud.model.Employee;
 import com.retailcloud.model.RoleTitle;
@@ -48,60 +49,90 @@ public class EmployeeService {
 		return employeeRepository.save(emp);
 	}
 
-	public Employee updateEmployee(Employee employee) {
-		validateEmployee(employee);
-		Employee employeeData = employeeRepository.findById(employee.getId())
-				.orElseThrow(() -> new RuntimeException("Employee not found"));
-		Employee savedData = null;
-		if (employeeData != null) {
-			savedData = employeeRepository.save(employee);
+
+	public Employee updateEmployee(Long id, UpdateEmployeeRequest request) {
+		Employee emp = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+
+		if (request.name != null)
+			emp.setName(request.name);
+		if (request.dob != null)
+			emp.setDob(request.dob);
+		if (request.salary != null)
+			emp.setSalary(request.salary);
+		if (request.address != null)
+			emp.setAddress(request.address);
+		if (request.joiningDate != null)
+			emp.setJoiningDate(request.joiningDate);
+		if (request.bonusPercentage != null)
+			emp.setBonusPercentage(request.bonusPercentage);
+
+		if (request.departmentId != null) {
+			Department department = departmentRepository.findById(request.departmentId)
+					.orElseThrow(() -> new RuntimeException("Department not found"));
+			emp.setDepartment(department);
 		}
-		return savedData;
+
+		if (request.roleId != null) {
+			RoleTitle role = roleTitleRepository.findById(request.roleId)
+					.orElseThrow(() -> new RuntimeException("Role not found"));
+			emp.setRole(role);
+		}
+
+		if (request.reportingManagerId != null) {
+			Employee manager = employeeRepository.findById(request.reportingManagerId)
+					.orElseThrow(() -> new RuntimeException("Reporting Manager not found"));
+			emp.setReportingManager(manager);
+		}
+
+		return employeeRepository.save(emp);
 	}
-	
+
 	public void validateEmployee(Employee employee) {
-	    if (employee.getName() == null || employee.getName().trim().isEmpty()) {
-	        throw new IllegalArgumentException("Employee name is required");
-	    }
+		if (employee.getName() == null || employee.getName().trim().isEmpty()) {
+			throw new IllegalArgumentException("Employee name is required");
+		}
 
-	    if (employee.getDob() == null || employee.getDob().isAfter(LocalDate.now())) {
-	        throw new IllegalArgumentException("Date of birth must be a valid past date");
-	    }
+		if (employee.getDob() == null || employee.getDob().isAfter(LocalDate.now())) {
+			throw new IllegalArgumentException("Date of birth must be a valid past date");
+		}
 
-	    if (employee.getSalary() == null || employee.getSalary() < 0) {
-	        throw new IllegalArgumentException("Salary must be a non-negative number");
-	    }
+		if (employee.getSalary() == null || employee.getSalary() < 0) {
+			throw new IllegalArgumentException("Salary must be a non-negative number");
+		}
 
-	    if (employee.getJoiningDate() == null || employee.getJoiningDate().isAfter(LocalDate.now())) {
-	        throw new IllegalArgumentException("Joining date must be a valid past or current date");
-	    }
+		if (employee.getJoiningDate() == null || employee.getJoiningDate().isAfter(LocalDate.now())) {
+			throw new IllegalArgumentException("Joining date must be a valid past or current date");
+		}
 
-	    if (employee.getRole() == null) {
-	        throw new IllegalArgumentException("Role is required");
-	    }
+		if (employee.getRole() == null) {
+			throw new IllegalArgumentException("Role is required");
+		}
 
-	    if (employee.getDepartment() == null) {
-	        throw new IllegalArgumentException("Department is required");
-	    }
+		if (employee.getDepartment() == null) {
+			throw new IllegalArgumentException("Department is required");
+		}
 
-	    if (employee.getReportingManager() == null && employee.getId() != null) {
-	        throw new IllegalArgumentException("Reporting manager is required");
-	    }
+		if (employee.getReportingManager() == null && employee.getId() != null) {
+			throw new IllegalArgumentException("Reporting manager is required");
+		}
 
-	    if (employee.getReportingManager() != null && employee.getReportingManager().getId().equals(employee.getId())) {
-	        throw new IllegalArgumentException("Employee cannot report to themselves");
-	    }
+		if (employee.getReportingManager() != null && employee.getReportingManager().getId().equals(employee.getId())) {
+			throw new IllegalArgumentException("Employee cannot report to themselves");
+		}
 	}
-	
+
 	public Employee updateEmployeeDepartment(Long employeeId, Long departmentId) {
-        Employee employee = employeeRepository.findById(employeeId)
-            .orElseThrow(() -> new RuntimeException("Employee not found"));
+		Employee employee = employeeRepository.findById(employeeId)
+				.orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        Department newDepartment = departmentRepository.findById(departmentId)
-            .orElseThrow(() -> new RuntimeException("Department not found"));
+		Department newDepartment = departmentRepository.findById(departmentId)
+				.orElseThrow(() -> new RuntimeException("Department not found"));
 
-        employee.setDepartment(newDepartment);
-        return employeeRepository.save(employee);
-    }
+		if(newDepartment.isDeleted()) {
+			throw new IllegalArgumentException("Department not found");
+		}
+		employee.setDepartment(newDepartment);
+		return employeeRepository.save(employee);
+	}
 
 }

@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.retailcloud.dto.CreateEmployeeRequest;
+import com.retailcloud.dto.EmployeeDetailsDto;
 import com.retailcloud.dto.EmployeeLookup;
+import com.retailcloud.dto.UpdateEmployeeRequest;
 import com.retailcloud.model.Employee;
 import com.retailcloud.repository.EmployeeRepository;
 import com.retailcloud.service.EmployeeService;
@@ -28,56 +30,56 @@ import com.retailcloud.service.EmployeeService;
 @RestController
 @RequestMapping("/v1/employees")
 public class EmployeeController {
-	
-    @Autowired 
-    private EmployeeService employeeService;
-    @Autowired
-	private EmployeeRepository employeeRepository;
-	
-	@PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody CreateEmployeeRequest request) {
-        Employee created = employeeService.createEmployee(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
-	
-	@PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id,@RequestBody Employee employee) {
-		if (!id.equals(employee.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
 
-        Employee updated = employeeService.updateEmployee(employee);
-        return ResponseEntity.ok(updated);
-    }
-	
-	@PutMapping("/{employeeId}/department/{departmentId}")
-    public ResponseEntity<?> moveEmployeeToDepartment(
-            @PathVariable Long employeeId,
-            @PathVariable Long departmentId) {
-        
-        Employee updatedEmployee = employeeService.updateEmployeeDepartment(employeeId, departmentId);
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Employee moved to new department successfully.");
-        return ResponseEntity.ok(response);
-    }
-	
-	@GetMapping("/details")
-    public ResponseEntity<Page<Employee>> getAllEmployees(@PageableDefault(size = 20) Pageable pageable) {
-        Page<Employee> employees = employeeRepository.findAll(pageable);
-        return ResponseEntity.ok(employees);
-    }
-	
-	@GetMapping("/employees")
-	public ResponseEntity<?> getEmployees(@RequestParam(required = false) Boolean lookup,
-	                                      @PageableDefault(size = 20) Pageable pageable) {
-	    if (Boolean.TRUE.equals(lookup)) {
-	        Page<EmployeeLookup> lookups = employeeRepository.findAllEmployeeLookups(pageable);
-	        return ResponseEntity.ok(lookups);
-	    } else {
-	        Page<Employee> employees = employeeRepository.findAll(pageable);
-	        return ResponseEntity.ok(employees);
-	    }
+	@Autowired
+	private EmployeeService employeeService;
+	@Autowired
+	private EmployeeRepository employeeRepository;
+
+	@PostMapping
+	public ResponseEntity<?> createEmployee(@RequestBody CreateEmployeeRequest request) {
+		Employee created = employeeService.createEmployee(request);
+		Map<String, String> response = new HashMap<>();
+		response.put("id", created.getId().toString());
+		response.put("message", "Employee created successfully");
+		return ResponseEntity.ok(response);
 	}
-	
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody UpdateEmployeeRequest request) {
+		Employee updated = employeeService.updateEmployee(id, request);
+		Map<String, String> response = new HashMap<>();
+		response.put("id", updated.getId().toString());
+		response.put("message", "Employee details updated successfully");
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{employeeId}/department/{departmentId}")
+	public ResponseEntity<?> moveEmployeeToDepartment(@PathVariable Long employeeId, @PathVariable Long departmentId) {
+
+		Employee updatedEmployee = employeeService.updateEmployeeDepartment(employeeId, departmentId);
+
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Employee moved to new department successfully.");
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/details")
+	public ResponseEntity<Page<EmployeeDetailsDto>> getAllEmployees(@PageableDefault(size = 20) Pageable pageable) {
+		Page<EmployeeDetailsDto> employees = employeeRepository.findAllEmployeeDetails(pageable);
+		return ResponseEntity.ok(employees);
+	}
+
+	@GetMapping()
+	public ResponseEntity<?> getEmployees(@RequestParam(required = false) Boolean lookup,
+			@PageableDefault(size = 20) Pageable pageable) {
+		if (Boolean.TRUE.equals(lookup)) {
+			Page<EmployeeLookup> lookups = employeeRepository.findAllEmployeeLookups(pageable);
+			return ResponseEntity.ok(lookups);
+		} else {
+			Page<EmployeeDetailsDto> employees = employeeRepository.findAllEmployeeDetails(pageable);
+			return ResponseEntity.ok(employees);
+		}
+	}
+
 }

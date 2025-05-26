@@ -21,6 +21,6 @@ public class AuditorAwareImpl implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
     	String userId = jwtService.getUserIdFromRequest(request);
-        return Optional.of(userId);
+        return Optional.ofNullable(userId);
     }
 }

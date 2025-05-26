@@ -4,7 +4,11 @@ public class EmployeeLookup {
 	private Long id;
     private String name;
 
-    public EmployeeLookup(Long id, String name) {
+    public EmployeeLookup() {
+		super();
+	}
+
+	public EmployeeLookup(Long id, String name) {
         this.id = id;
         this.name = name;
     }

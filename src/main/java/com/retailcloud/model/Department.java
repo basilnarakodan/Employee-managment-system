@@ -2,6 +2,7 @@ package com.retailcloud.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
@@ -11,7 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 @Entity
-public class Department {
+public class Department extends AuditLog{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +24,8 @@ public class Department {
 	private Employee departmentHead;
 
 	@OneToMany(mappedBy = "department")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@JsonIgnore
 	private List<Employee> employees;
 
 	public Long getId() {

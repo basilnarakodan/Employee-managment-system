@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Employee {
+public class Employee extends AuditLog{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
