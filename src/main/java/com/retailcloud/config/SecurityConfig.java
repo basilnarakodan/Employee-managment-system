@@ -37,8 +37,6 @@ public class SecurityConfig {
 //				.authorizeHttpRequests(request -> request.requestMatchers("login", "register").permitAll().anyRequest()
 //						.authenticated())
 				.authorizeHttpRequests(request -> request.requestMatchers("/**").permitAll())
-//						.requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/user/**")
-//						.hasAnyRole("USER", "ADMIN").anyRequest().authenticated())
 				.httpBasic(Customizer.withDefaults())
 //				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();
@@ -64,10 +62,10 @@ public class SecurityConfig {
 @Bean
 public CorsFilter corsFilter() {
     CorsConfiguration corsConfig = new CorsConfiguration();
-    corsConfig.addAllowedOrigin("http://localhost:3000"); // Frontend origin
-    corsConfig.addAllowedMethod("*"); // Allow all HTTP methods
-    corsConfig.addAllowedHeader("*"); // Allow all headers
-    corsConfig.setAllowCredentials(true); // Allow credentials like cookies
+    corsConfig.addAllowedOrigin("http://localhost:3000"); 
+    corsConfig.addAllowedMethod("*"); 
+    corsConfig.addAllowedHeader("*"); 
+    corsConfig.setAllowCredentials(true); 
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfig);
